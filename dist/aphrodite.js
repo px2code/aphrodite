@@ -3,6 +3,8 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
       return typeof obj;
@@ -31,43 +33,71 @@ function _defineProperty(obj, key, value) {
   return obj;
 }
 
-function _objectSpread(target) {
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i] != null ? arguments[i] : {};
-    var ownKeys = Object.keys(source);
 
-    if (typeof Object.getOwnPropertySymbols === 'function') {
-      ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-      }));
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
     }
-
-    ownKeys.forEach(function (key) {
-      _defineProperty(target, key, source[key]);
-    });
   }
 
   return target;
 }
 
 function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
 }
 
 function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
 }
 
 function _iterableToArray(iter) {
-  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
 }
 
 function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance");
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 
 function hash(str) {
@@ -256,10 +286,10 @@ var importantify = function importantify(string
   );
 };
 
-var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
 function createCommonjsModule(fn, module) {
@@ -267,7 +297,7 @@ function createCommonjsModule(fn, module) {
 }
 
 function getCjsExportFromNamespace (n) {
-	return n && n.default || n;
+	return n && n['default'] || n;
 }
 
 // Use the fastest means possible to execute a task in its own turn, with
@@ -548,9 +578,7 @@ RawTask.prototype.call = function () {
 /* @flow */
 var MAP_EXISTS = typeof Map !== 'undefined';
 
-var OrderedElements =
-/*#__PURE__*/
-function () {
+var OrderedElements = /*#__PURE__*/function () {
   /* ::
   elements: {[string]: any};
   keyOrder: string[];
@@ -1143,6 +1171,146 @@ function gradient(property, value) {
 
 var gradient = unwrapExports(gradient_1);
 
+var grid_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+exports.default = grid;
+function isSimplePositionValue(value) {
+  return typeof value === 'number' && !isNaN(value);
+}
+
+function isComplexSpanValue(value) {
+  return typeof value === 'string' && value.includes('/');
+}
+
+var alignmentValues = ['center', 'end', 'start', 'stretch'];
+
+var displayValues = {
+  'inline-grid': ['-ms-inline-grid', 'inline-grid'],
+  grid: ['-ms-grid', 'grid']
+};
+
+var propertyConverters = {
+  alignSelf: function alignSelf(value, style) {
+    if (alignmentValues.indexOf(value) > -1) {
+      style.msGridRowAlign = value;
+    }
+  },
+
+  gridColumn: function gridColumn(value, style) {
+    if (isSimplePositionValue(value)) {
+      style.msGridColumn = value;
+    } else if (isComplexSpanValue(value)) {
+      var _value$split = value.split('/'),
+          _value$split2 = _slicedToArray(_value$split, 2),
+          start = _value$split2[0],
+          end = _value$split2[1];
+
+      propertyConverters.gridColumnStart(+start, style);
+
+      var _end$split = end.split(/ ?span /),
+          _end$split2 = _slicedToArray(_end$split, 2),
+          maybeSpan = _end$split2[0],
+          maybeNumber = _end$split2[1];
+
+      if (maybeSpan === '') {
+        propertyConverters.gridColumnEnd(+start + +maybeNumber, style);
+      } else {
+        propertyConverters.gridColumnEnd(+end, style);
+      }
+    } else {
+      propertyConverters.gridColumnStart(value, style);
+    }
+  },
+
+  gridColumnEnd: function gridColumnEnd(value, style) {
+    var msGridColumn = style.msGridColumn;
+
+    if (isSimplePositionValue(value) && isSimplePositionValue(msGridColumn)) {
+      style.msGridColumnSpan = value - msGridColumn;
+    }
+  },
+
+  gridColumnStart: function gridColumnStart(value, style) {
+    if (isSimplePositionValue(value)) {
+      style.msGridColumn = value;
+    }
+  },
+
+  gridRow: function gridRow(value, style) {
+    if (isSimplePositionValue(value)) {
+      style.msGridRow = value;
+    } else if (isComplexSpanValue(value)) {
+      var _value$split3 = value.split('/'),
+          _value$split4 = _slicedToArray(_value$split3, 2),
+          start = _value$split4[0],
+          end = _value$split4[1];
+
+      propertyConverters.gridRowStart(+start, style);
+
+      var _end$split3 = end.split(/ ?span /),
+          _end$split4 = _slicedToArray(_end$split3, 2),
+          maybeSpan = _end$split4[0],
+          maybeNumber = _end$split4[1];
+
+      if (maybeSpan === '') {
+        propertyConverters.gridRowEnd(+start + +maybeNumber, style);
+      } else {
+        propertyConverters.gridRowEnd(+end, style);
+      }
+    } else {
+      propertyConverters.gridRowStart(value, style);
+    }
+  },
+
+  gridRowEnd: function gridRowEnd(value, style) {
+    var msGridRow = style.msGridRow;
+
+    if (isSimplePositionValue(value) && isSimplePositionValue(msGridRow)) {
+      style.msGridRowSpan = value - msGridRow;
+    }
+  },
+
+  gridRowStart: function gridRowStart(value, style) {
+    if (isSimplePositionValue(value)) {
+      style.msGridRow = value;
+    }
+  },
+
+  gridTemplateColumns: function gridTemplateColumns(value, style) {
+    style.msGridColumns = value;
+  },
+
+  gridTemplateRows: function gridTemplateRows(value, style) {
+    style.msGridRows = value;
+  },
+
+  justifySelf: function justifySelf(value, style) {
+    if (alignmentValues.indexOf(value) > -1) {
+      style.msGridColumnAlign = value;
+    }
+  }
+};
+
+function grid(property, value, style) {
+  if (property === 'display' && value in displayValues) {
+    return displayValues[value];
+  }
+
+  if (property in propertyConverters) {
+    var propertyConverter = propertyConverters[property];
+    propertyConverter(value, style);
+  }
+}
+});
+
+var grid = unwrapExports(grid_1);
+
 var imageSet_1 = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -1284,7 +1452,8 @@ function hyphenateStyleName(name) {
 }
 
 var hyphenateStyleName$1 = /*#__PURE__*/Object.freeze({
-  default: hyphenateStyleName
+  __proto__: null,
+  'default': hyphenateStyleName
 });
 
 var _hyphenateStyleName = getCjsExportFromNamespace(hyphenateStyleName$1);
@@ -1413,7 +1582,7 @@ var wm = ["Webkit", "Moz"];
 var wms = ["Webkit", "ms"];
 var wmms = ["Webkit", "Moz", "ms"];
 var staticData = {
-  plugins: [backgroundClip, calc, crossFade, cursor, filter, flex, flexboxIE, flexboxOld, gradient, imageSet, logical, position, sizing, transition],
+  plugins: [backgroundClip, calc, crossFade, cursor, filter, flex, flexboxIE, flexboxOld, gradient, grid, imageSet, logical, position, sizing, transition],
   prefixMap: {
     "transform": wms,
     "transformOrigin": wms,
@@ -1433,32 +1602,32 @@ var staticData = {
     "animationName": w,
     "animationPlayState": w,
     "animationTimingFunction": w,
-    "appearance": wm,
+    "appearance": wmms,
     "userSelect": wmms,
     "fontKerning": w,
-    "textEmphasisPosition": w,
-    "textEmphasis": w,
-    "textEmphasisStyle": w,
-    "textEmphasisColor": w,
-    "boxDecorationBreak": w,
+    "textEmphasisPosition": wms,
+    "textEmphasis": wms,
+    "textEmphasisStyle": wms,
+    "textEmphasisColor": wms,
+    "boxDecorationBreak": wms,
     "clipPath": w,
-    "maskImage": w,
-    "maskMode": w,
-    "maskRepeat": w,
-    "maskPosition": w,
-    "maskClip": w,
-    "maskOrigin": w,
-    "maskSize": w,
-    "maskComposite": w,
-    "mask": w,
-    "maskBorderSource": w,
-    "maskBorderMode": w,
-    "maskBorderSlice": w,
-    "maskBorderWidth": w,
-    "maskBorderOutset": w,
-    "maskBorderRepeat": w,
-    "maskBorder": w,
-    "maskType": w,
+    "maskImage": wms,
+    "maskMode": wms,
+    "maskRepeat": wms,
+    "maskPosition": wms,
+    "maskClip": wms,
+    "maskOrigin": wms,
+    "maskSize": wms,
+    "maskComposite": wms,
+    "mask": wms,
+    "maskBorderSource": wms,
+    "maskBorderMode": wms,
+    "maskBorderSlice": wms,
+    "maskBorderWidth": wms,
+    "maskBorderOutset": wms,
+    "maskBorderRepeat": wms,
+    "maskBorder": wms,
+    "maskType": wms,
     "textDecorationStyle": wm,
     "textDecorationSkip": wm,
     "textDecorationLine": wm,
@@ -1478,7 +1647,7 @@ var staticData = {
     "columns": wm,
     "columnSpan": wm,
     "columnWidth": wm,
-    "writingMode": wms,
+    "writingMode": w,
     "flex": wms,
     "flexBasis": w,
     "flexDirection": wms,
@@ -1516,25 +1685,7 @@ var staticData = {
     "wrapThrough": ms,
     "wrapMargin": ms,
     "touchAction": ms,
-    "gridTemplateColumns": ms,
-    "gridTemplateRows": ms,
-    "gridTemplateAreas": ms,
-    "gridTemplate": ms,
-    "gridAutoColumns": ms,
-    "gridAutoRows": ms,
-    "gridAutoFlow": ms,
-    "grid": ms,
-    "gridRowStart": ms,
-    "gridColumnStart": ms,
-    "gridRowEnd": ms,
-    "gridRow": ms,
-    "gridColumn": ms,
-    "gridColumnEnd": ms,
-    "gridColumnGap": ms,
-    "gridRowGap": ms,
-    "gridArea": ms,
-    "gridGap": ms,
-    "textSizeAdjust": wms,
+    "textSizeAdjust": ["ms", "Webkit"],
     "borderImage": w,
     "borderImageOutset": w,
     "borderImageRepeat": w,
@@ -2238,7 +2389,7 @@ var unminifiedHashFn = function unminifiedHashFn(str
 
 
 var initialHashFn = function initialHashFn() {
-  return hashString;
+  return  hashString ;
 };
 var hashFn = initialHashFn();
 var StyleSheet = {
@@ -2304,7 +2455,7 @@ var StyleSheetServer = typeof window !== 'undefined' ? null : {
  * Not meant to be used in production.
  */
 
-var StyleSheetTestUtils = null;
+var StyleSheetTestUtils =  null ;
 /**
  * Generate the Aphrodite API exports, with given `selectorHandlers` and
  * `useImportant` state.
@@ -2317,7 +2468,7 @@ function makeExports(useImportant
   /* : SelectorHandler[] */
   = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultSelectorHandlers;
   return {
-    StyleSheet: _objectSpread({}, StyleSheet, {
+    StyleSheet: _objectSpread2(_objectSpread2({}, StyleSheet), {}, {
       /**
        * Returns a version of the exports of Aphrodite (i.e. an object
        * with `css` and `StyleSheet` properties) which have some
@@ -2364,6 +2515,7 @@ function makeExports(useImportant
       return injectAndGetClassName(useImportant, styleDefinitions, selectorHandlers);
     },
     flushToStyleTag: flushToStyleTag,
+    flushToString: flushToString,
     injectAndGetClassName: injectAndGetClassName,
     defaultSelectorHandlers: defaultSelectorHandlers
   };
@@ -2377,6 +2529,7 @@ var StyleSheet$1 = Aphrodite.StyleSheet,
     StyleSheetTestUtils$1 = Aphrodite.StyleSheetTestUtils,
     css = Aphrodite.css,
     minify = Aphrodite.minify,
+    flushToString$1 = Aphrodite.flushToString,
     flushToStyleTag$1 = Aphrodite.flushToStyleTag,
     injectAndGetClassName$1 = Aphrodite.injectAndGetClassName,
     defaultSelectorHandlers$1 = Aphrodite.defaultSelectorHandlers;
@@ -2385,7 +2538,8 @@ exports.StyleSheet = StyleSheet$1;
 exports.StyleSheetServer = StyleSheetServer$1;
 exports.StyleSheetTestUtils = StyleSheetTestUtils$1;
 exports.css = css;
-exports.minify = minify;
+exports.defaultSelectorHandlers = defaultSelectorHandlers$1;
+exports.flushToString = flushToString$1;
 exports.flushToStyleTag = flushToStyleTag$1;
 exports.injectAndGetClassName = injectAndGetClassName$1;
-exports.defaultSelectorHandlers = defaultSelectorHandlers$1;
+exports.minify = minify;

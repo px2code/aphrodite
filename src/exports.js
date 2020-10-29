@@ -186,6 +186,7 @@ export default function makeExports(
         },
 
         flushToStyleTag,
+        flushToString,
         injectAndGetClassName,
         defaultSelectorHandlers,
     };

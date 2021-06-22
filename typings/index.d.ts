@@ -127,4 +127,5 @@ interface Exports {
     StyleSheetServer: StyleSheetServerStatic;
     StyleSheetTestUtils: StyleSheetTestUtilsStatic;
     flushToStyleTag(): void;
+    prefix(p: string): void;
 }

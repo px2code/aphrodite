@@ -24,17 +24,19 @@ type Extension = {
 export type MaybeSheetDefinition = SheetDefinition | false | null | void
 */
 
-const unminifiedHashFn = (str/* : string */, key/* : string */) => `${key}_${hashString(str)}`;
+//const unminifiedHashFn = (str/* : string */, key/* : string */) => `${key}_${hashString(str)}`;
+const unminifiedHashFn = (str/* : string */, key/* : string */) => `${key}`;
 
 // StyleSheet.create is in a hot path so we want to keep as much logic out of it
 // as possible. So, we figure out which hash function to use once, and only
 // switch it out via minify() as necessary.
 //
 // This is in an exported function to make it easier to test.
-export const initialHashFn = () => process.env.NODE_ENV === 'production'
-    ? hashString
-    : unminifiedHashFn;
+// export const initialHashFn = () => process.env.NODE_ENV === 'production'
+//    ? hashString
+//    : unminifiedHashFn;
 
+export const initialHashFn = () => unminifiedHashFn;
 let hashFn = initialHashFn();
 
 const StyleSheet = {
@@ -72,33 +74,33 @@ const StyleSheet = {
  *     "typeof window": JSON.stringify("object")
  *   })
  */
-const StyleSheetServer = typeof window !== 'undefined'
-    ? null
-    : {
-        renderStatic(renderFunc /* : RenderFunction */) {
-            reset();
-            startBuffering();
-            const html = renderFunc();
-            const cssContent = flushToString();
+const StyleSheetServer = typeof window !== 'undefined' && false ? // pxCode: export for browser
+    null :
+{
+  renderStatic(renderFunc /* : RenderFunction */) {
+    reset();
+    startBuffering();
+    const html = renderFunc();
+    const cssContent = flushToString();
 
-            return {
-                html: html,
-                css: {
-                    content: cssContent,
-                    renderedClassNames: getRenderedClassNames(),
-                },
-            };
-        },
+    return {
+      html,
+      css: {
+        content: cssContent,
+        renderedClassNames: getRenderedClassNames()
+      }
     };
+  }
+};
 
 /**
  * Utilities for using Aphrodite in tests.
  *
  * Not meant to be used in production.
  */
-const StyleSheetTestUtils = process.env.NODE_ENV === 'production'
-    ? null
-    : {
+const StyleSheetTestUtils = process.env.NODE_ENV === 'production' ?
+    null :
+{
         /**
         * Prevent styles from being injected into the DOM.
         *
@@ -132,13 +134,16 @@ const StyleSheetTestUtils = process.env.NODE_ENV === 'production'
         }
     };
 
+let prefixName = '';
+
 /**
  * Generate the Aphrodite API exports, with given `selectorHandlers` and
  * `useImportant` state.
  */
 export default function makeExports(
-    useImportant /* : boolean */,
-    selectorHandlers /* : SelectorHandler[] */ = defaultSelectorHandlers,
+  useImportant /* : boolean */,
+  noAutoPrefix /* : boolean */,
+  selectorHandlers /* : SelectorHandler[] */ = defaultSelectorHandlers,
 ) {
     return {
         StyleSheet: {
@@ -169,6 +174,7 @@ export default function makeExports(
 
                 return makeExports(
                     useImportant,
+                    noAutoPrefix,
                     selectorHandlers.concat(extensionSelectorHandlers)
                 );
             },
@@ -181,9 +187,13 @@ export default function makeExports(
             hashFn = shouldMinify ? hashString : unminifiedHashFn;
         },
 
+        prefix(name) {
+          prefixName = name;
+        },
+
         css(...styleDefinitions /* : MaybeSheetDefinition[] */) {
-            return injectAndGetClassName(
-                useImportant, styleDefinitions, selectorHandlers);
+          return injectAndGetClassName(
+                    useImportant, noAutoPrefix, styleDefinitions, selectorHandlers, prefixName);
         },
 
         flushToStyleTag,

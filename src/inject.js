@@ -183,6 +183,7 @@ export const injectStyleOnce = (
     selector /* : string */,
     definitions /* : SheetDefinition[] */,
     useImportant /* : boolean */,
+    noAutoPrefix /* : boolean */,
     selectorHandlers /* : SelectorHandler[] */ = []
 ) => {
     if (alreadyInjected[key]) {
@@ -191,7 +192,7 @@ export const injectStyleOnce = (
 
     const generated = generateCSS(
         selector, definitions, selectorHandlers,
-        stringHandlers, useImportant);
+        stringHandlers, useImportant, noAutoPrefix);
 
     injectGeneratedCSSOnce(key, generated);
 };
@@ -292,8 +293,10 @@ const processStyleDefinitions = (
  */
 export const injectAndGetClassName = (
     useImportant /* : boolean */,
+    noAutoPrefix /* : boolean */,
     styleDefinitions /* : MaybeSheetDefinition[] */,
-    selectorHandlers /* : SelectorHandler[] */
+    selectorHandlers /* : SelectorHandler[] */,
+    prefixName /* : string */
 ) /* : string */ => {
     const classNameBits = [];
     const definitionBits = [];
@@ -312,22 +315,17 @@ export const injectAndGetClassName = (
         return "";
     }
 
-    let className;
-    if (process.env.NODE_ENV === 'production') {
-        className = classNameBits.length === 1 ?
-            `_${classNameBits[0]}` :
-            `_${hashString(classNameBits.join())}${(length % 36).toString(36)}`;
-    } else {
-        className = classNameBits.join("-o_O-");
-    }
+    const className = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_');
+    const newClassName = `${prefixName? `${prefixName}-` : ''}${className}`.replace(/_/g, '-');
 
     injectStyleOnce(
-        className,
-        `.${className}`,
+        newClassName,
+        `.${newClassName}`,
         definitionBits,
         useImportant,
+        noAutoPrefix,
         selectorHandlers
     );
 
-    return className;
+    return newClassName;
 }

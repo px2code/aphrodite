@@ -5,8 +5,9 @@
 import makeExports from './exports';
 
 const useImportant = false; // Don't add !important to style definitions
+const noAutoPrefix = true;
 
-const Aphrodite = makeExports(useImportant);
+const Aphrodite = makeExports(useImportant, noAutoPrefix);
 
 const {
     StyleSheet,
@@ -14,11 +15,10 @@ const {
     StyleSheetTestUtils,
     css,
     minify,
+    prefix,
     flushToStyleTag,
     injectAndGetClassName,
     defaultSelectorHandlers,
-    reset,
-    resetInjectedStyle,
 } = Aphrodite;
 
 export {
@@ -27,9 +27,8 @@ export {
     StyleSheetTestUtils,
     css,
     minify,
+    prefix,
     flushToStyleTag,
     injectAndGetClassName,
     defaultSelectorHandlers,
-    reset,
-    resetInjectedStyle,
 };

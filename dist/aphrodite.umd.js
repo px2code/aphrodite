@@ -2,9 +2,49 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.aphrodite = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+
+      if (enumerableOnly) {
+        symbols = symbols.filter(function (sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+        });
+      }
+
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+
+    return target;
+  }
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -33,43 +73,37 @@
     return obj;
   }
 
-  function _objectSpread(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-      var ownKeys = Object.keys(source);
-
-      if (typeof Object.getOwnPropertySymbols === 'function') {
-        ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-        }));
-      }
-
-      ownKeys.forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    }
-
-    return target;
-  }
-
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
   }
 
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function hash(str) {
@@ -546,9 +580,7 @@
   /* @flow */
   var MAP_EXISTS = typeof Map !== 'undefined';
 
-  var OrderedElements =
-  /*#__PURE__*/
-  function () {
+  var OrderedElements = /*#__PURE__*/function () {
     /* ::
     elements: {[string]: any};
     keyOrder: string[];
@@ -1154,6 +1186,10 @@
     return typeof value === 'number' && !isNaN(value);
   }
 
+  function isComplexSpanValue(value) {
+    return typeof value === 'string' && value.includes('/');
+  }
+
   var alignmentValues = ['center', 'end', 'start', 'stretch'];
 
   var displayValues = {
@@ -1171,16 +1207,26 @@
     gridColumn: function gridColumn(value, style) {
       if (isSimplePositionValue(value)) {
         style.msGridColumn = value;
-      } else {
-        var _value$split$map = value.split('/').map(function (position) {
-          return +position;
-        }),
-            _value$split$map2 = _slicedToArray(_value$split$map, 2),
-            start = _value$split$map2[0],
-            end = _value$split$map2[1];
+      } else if (isComplexSpanValue(value)) {
+        var _value$split = value.split('/'),
+            _value$split2 = _slicedToArray(_value$split, 2),
+            start = _value$split2[0],
+            end = _value$split2[1];
 
-        propertyConverters.gridColumnStart(start, style);
-        propertyConverters.gridColumnEnd(end, style);
+        propertyConverters.gridColumnStart(+start, style);
+
+        var _end$split = end.split(/ ?span /),
+            _end$split2 = _slicedToArray(_end$split, 2),
+            maybeSpan = _end$split2[0],
+            maybeNumber = _end$split2[1];
+
+        if (maybeSpan === '') {
+          propertyConverters.gridColumnEnd(+start + +maybeNumber, style);
+        } else {
+          propertyConverters.gridColumnEnd(+end, style);
+        }
+      } else {
+        propertyConverters.gridColumnStart(value, style);
       }
     },
 
@@ -1201,16 +1247,26 @@
     gridRow: function gridRow(value, style) {
       if (isSimplePositionValue(value)) {
         style.msGridRow = value;
-      } else {
-        var _value$split$map3 = value.split('/').map(function (position) {
-          return +position;
-        }),
-            _value$split$map4 = _slicedToArray(_value$split$map3, 2),
-            start = _value$split$map4[0],
-            end = _value$split$map4[1];
+      } else if (isComplexSpanValue(value)) {
+        var _value$split3 = value.split('/'),
+            _value$split4 = _slicedToArray(_value$split3, 2),
+            start = _value$split4[0],
+            end = _value$split4[1];
 
-        propertyConverters.gridRowStart(start, style);
-        propertyConverters.gridRowEnd(end, style);
+        propertyConverters.gridRowStart(+start, style);
+
+        var _end$split3 = end.split(/ ?span /),
+            _end$split4 = _slicedToArray(_end$split3, 2),
+            maybeSpan = _end$split4[0],
+            maybeNumber = _end$split4[1];
+
+        if (maybeSpan === '') {
+          propertyConverters.gridRowEnd(+start + +maybeNumber, style);
+        } else {
+          propertyConverters.gridRowEnd(+end, style);
+        }
+      } else {
+        propertyConverters.gridRowStart(value, style);
       }
     },
 
@@ -1541,32 +1597,32 @@
       "animationName": w,
       "animationPlayState": w,
       "animationTimingFunction": w,
-      "appearance": wm,
+      "appearance": wmms,
       "userSelect": wmms,
       "fontKerning": w,
-      "textEmphasisPosition": w,
-      "textEmphasis": w,
-      "textEmphasisStyle": w,
-      "textEmphasisColor": w,
-      "boxDecorationBreak": w,
+      "textEmphasisPosition": wms,
+      "textEmphasis": wms,
+      "textEmphasisStyle": wms,
+      "textEmphasisColor": wms,
+      "boxDecorationBreak": wms,
       "clipPath": w,
-      "maskImage": w,
-      "maskMode": w,
-      "maskRepeat": w,
-      "maskPosition": w,
-      "maskClip": w,
-      "maskOrigin": w,
-      "maskSize": w,
-      "maskComposite": w,
-      "mask": w,
-      "maskBorderSource": w,
-      "maskBorderMode": w,
-      "maskBorderSlice": w,
-      "maskBorderWidth": w,
-      "maskBorderOutset": w,
-      "maskBorderRepeat": w,
-      "maskBorder": w,
-      "maskType": w,
+      "maskImage": wms,
+      "maskMode": wms,
+      "maskRepeat": wms,
+      "maskPosition": wms,
+      "maskClip": wms,
+      "maskOrigin": wms,
+      "maskSize": wms,
+      "maskComposite": wms,
+      "mask": wms,
+      "maskBorderSource": wms,
+      "maskBorderMode": wms,
+      "maskBorderSlice": wms,
+      "maskBorderWidth": wms,
+      "maskBorderOutset": wms,
+      "maskBorderRepeat": wms,
+      "maskBorder": wms,
+      "maskType": wms,
       "textDecorationStyle": wm,
       "textDecorationSkip": wm,
       "textDecorationLine": wm,
@@ -1586,7 +1642,7 @@
       "columns": wm,
       "columnSpan": wm,
       "columnWidth": wm,
-      "writingMode": wms,
+      "writingMode": w,
       "flex": wms,
       "flexBasis": w,
       "flexDirection": wms,
@@ -1769,6 +1825,8 @@
   /* : StringHandlers */
   , useImportant
   /* : boolean */
+  , noAutoPrefix
+  /* : boolean */
   )
   /* : string[] */
   {
@@ -1786,7 +1844,7 @@
       // styles.
       var foundHandler = selectorHandlers.some(function (handler) {
         var result = handler(key, selector, function (newSelector) {
-          return generateCSS(newSelector, [val], selectorHandlers, stringHandlers, useImportant);
+          return generateCSS(newSelector, [val], selectorHandlers, stringHandlers, useImportant, noAutoPrefix);
         });
 
         if (result != null) {
@@ -1802,6 +1860,8 @@
 
           return true;
         }
+
+        return false;
       }); // If none of the handlers handled it, add it to the list of plain
       // style declarations.
 
@@ -1809,7 +1869,7 @@
         plainDeclarations.set(key, val, true);
       }
     });
-    var generatedRuleset = generateCSSRuleset(selector, plainDeclarations, stringHandlers, useImportant, selectorHandlers);
+    var generatedRuleset = generateCSSRuleset(selector, plainDeclarations, stringHandlers, useImportant, noAutoPrefix, selectorHandlers);
 
     if (generatedRuleset) {
       generatedStyles.unshift(generatedRuleset);
@@ -1918,6 +1978,8 @@
   /* : StringHandlers */
   , useImportant
   /* : boolean */
+  , noAutoPrefix
+  /* : boolean */
   , selectorHandlers
   /* : SelectorHandler[] */
   )
@@ -1927,7 +1989,7 @@
     runStringHandlers(declarations, stringHandlers, selectorHandlers);
     var originalElements = Object.keys(declarations.elements).reduce(arrayToObjectKeysReducer, Object.create(null)); // NOTE(emily): This mutates handledDeclarations.elements.
 
-    var prefixedElements = prefixAll(declarations.elements);
+    var prefixedElements = noAutoPrefix ? declarations.elements : prefixAll(declarations.elements);
     var elementNames = Object.keys(prefixedElements);
 
     if (elementNames.length !== declarations.keyOrder.length) {
@@ -2178,16 +2240,18 @@
   /* : SheetDefinition[] */
   , useImportant
   /* : boolean */
+  , noAutoPrefix
+  /* : boolean */
   ) {
     var selectorHandlers
     /* : SelectorHandler[] */
-    = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
+    = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [];
 
     if (alreadyInjected[key]) {
       return;
     }
 
-    var generated = generateCSS(selector, definitions, selectorHandlers, stringHandlers, useImportant);
+    var generated = generateCSS(selector, definitions, selectorHandlers, stringHandlers, useImportant, noAutoPrefix);
     injectGeneratedCSSOnce(key, generated);
   };
   var reset = function reset() {
@@ -2195,6 +2259,11 @@
     alreadyInjected = {};
     isBuffering = false;
     styleTag = null;
+  };
+  var resetInjectedStyle = function resetInjectedStyle(key
+  /* : string */
+  ) {
+    delete alreadyInjected[key];
   };
   var startBuffering = function startBuffering() {
     if (isBuffering) {
@@ -2234,6 +2303,12 @@
     });
   };
 
+  var isValidStyleDefinition = function isValidStyleDefinition(def
+  /* : Object */
+  ) {
+    return "_definition" in def && "_name" in def && "_len" in def;
+  };
+
   var processStyleDefinitions = function processStyleDefinitions(styleDefinitions
   /* : any[] */
   , classNameBits
@@ -2252,10 +2327,12 @@
         if (Array.isArray(styleDefinitions[i])) {
           // We've encountered an array, so let's recurse
           length += processStyleDefinitions(styleDefinitions[i], classNameBits, definitionBits, length);
-        } else {
+        } else if (isValidStyleDefinition(styleDefinitions[i])) {
           classNameBits.push(styleDefinitions[i]._name);
           definitionBits.push(styleDefinitions[i]._definition);
           length += styleDefinitions[i]._len;
+        } else {
+          throw new Error("Invalid Style Definition: Styles should be defined using the StyleSheet.create method.");
         }
       }
     }
@@ -2276,10 +2353,14 @@
 
   var injectAndGetClassName = function injectAndGetClassName(useImportant
   /* : boolean */
+  , noAutoPrefix
+  /* : boolean */
   , styleDefinitions
   /* : MaybeSheetDefinition[] */
   , selectorHandlers
   /* : SelectorHandler[] */
+  , prefixName
+  /* : string */
   )
   /* : string */
   {
@@ -2293,14 +2374,10 @@
       return "";
     }
 
-    var className;
-
-    {
-      className = classNameBits.length === 1 ? "_".concat(classNameBits[0]) : "_".concat(hashString(classNameBits.join())).concat((length % 36).toString(36));
-    }
-
-    injectStyleOnce(className, ".".concat(className), definitionBits, useImportant, selectorHandlers);
-    return className;
+    var className = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_');
+    var newClassName = "".concat(prefixName ? "".concat(prefixName, "-") : '').concat(className).replace(/_/g, '-');
+    injectStyleOnce(newClassName, ".".concat(newClassName), definitionBits, useImportant, noAutoPrefix, selectorHandlers);
+    return newClassName;
   };
 
   /* ::
@@ -2313,22 +2390,26 @@
   };
   export type MaybeSheetDefinition = SheetDefinition | false | null | void
   */
+  //const unminifiedHashFn = (str/* : string */, key/* : string */) => `${key}_${hashString(str)}`;
 
   var unminifiedHashFn = function unminifiedHashFn(str
   /* : string */
   , key
   /* : string */
   ) {
-    return "".concat(key, "_").concat(hashString(str));
+    return "".concat(key);
   }; // StyleSheet.create is in a hot path so we want to keep as much logic out of it
   // as possible. So, we figure out which hash function to use once, and only
   // switch it out via minify() as necessary.
   //
   // This is in an exported function to make it easier to test.
+  // export const initialHashFn = () => "production" === 'production'
+  //    ? hashString
+  //    : unminifiedHashFn;
 
 
   var initialHashFn = function initialHashFn() {
-    return hashString;
+    return unminifiedHashFn;
   };
   var hashFn = initialHashFn();
   var StyleSheet = {
@@ -2371,7 +2452,8 @@
    *   })
    */
 
-  var StyleSheetServer = typeof window !== 'undefined' ? null : {
+  var StyleSheetServer = typeof window !== 'undefined' && false ? // pxCode: export for browser
+  null : {
     renderStatic: function renderStatic(renderFunc
     /* : RenderFunction */
     ) {
@@ -2394,7 +2476,8 @@
    * Not meant to be used in production.
    */
 
-  var StyleSheetTestUtils = null;
+  var StyleSheetTestUtils =  null ;
+  var prefixName = '';
   /**
    * Generate the Aphrodite API exports, with given `selectorHandlers` and
    * `useImportant` state.
@@ -2402,12 +2485,14 @@
 
   function makeExports(useImportant
   /* : boolean */
+  , noAutoPrefix
+  /* : boolean */
   ) {
     var selectorHandlers
     /* : SelectorHandler[] */
-    = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultSelectorHandlers;
+    = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultSelectorHandlers;
     return {
-      StyleSheet: _objectSpread({}, StyleSheet, {
+      StyleSheet: _objectSpread2(_objectSpread2({}, StyleSheet), {}, {
         /**
          * Returns a version of the exports of Aphrodite (i.e. an object
          * with `css` and `StyleSheet` properties) which have some
@@ -2434,7 +2519,7 @@
           .filter(function (handler) {
             return handler;
           });
-          return makeExports(useImportant, selectorHandlers.concat(extensionSelectorHandlers));
+          return makeExports(useImportant, noAutoPrefix, selectorHandlers.concat(extensionSelectorHandlers));
         }
       }),
       StyleSheetServer: StyleSheetServer,
@@ -2444,6 +2529,9 @@
       ) {
         hashFn = shouldMinify ? hashString : unminifiedHashFn;
       },
+      prefix: function prefix(name) {
+        prefixName = name;
+      },
       css: function css()
       /* : MaybeSheetDefinition[] */
       {
@@ -2451,11 +2539,13 @@
           styleDefinitions[_key] = arguments[_key];
         }
 
-        return injectAndGetClassName(useImportant, styleDefinitions, selectorHandlers);
+        return injectAndGetClassName(useImportant, noAutoPrefix, styleDefinitions, selectorHandlers, prefixName);
       },
       flushToStyleTag: flushToStyleTag,
       injectAndGetClassName: injectAndGetClassName,
-      defaultSelectorHandlers: defaultSelectorHandlers
+      defaultSelectorHandlers: defaultSelectorHandlers,
+      reset: reset,
+      resetInjectedStyle: resetInjectedStyle
     };
   }
 
@@ -2482,5 +2572,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=aphrodite.umd.js.map

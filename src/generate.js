@@ -139,7 +139,8 @@ export const generateCSS = (
     styleTypes /* : SheetDefinition[] */,
     selectorHandlers /* : SelectorHandler[] */,
     stringHandlers /* : StringHandlers */,
-    useImportant /* : boolean */
+    useImportant /* : boolean */,
+    noAutoPrefix /* : boolean */
 ) /* : string[] */ => {
     const merged = new OrderedElements();
 
@@ -158,7 +159,7 @@ export const generateCSS = (
             const result = handler(key, selector, (newSelector) => {
                 return generateCSS(
                     newSelector, [val], selectorHandlers,
-                    stringHandlers, useImportant);
+                    stringHandlers, useImportant, noAutoPrefix)
             });
             if (result != null) {
                 // If the handler returned something, add it to the generated
@@ -176,6 +177,8 @@ export const generateCSS = (
                 }
                 return true;
             }
+
+              return false;
         });
         // If none of the handlers handled it, add it to the list of plain
         // style declarations.
@@ -188,6 +191,7 @@ export const generateCSS = (
         plainDeclarations,
         stringHandlers,
         useImportant,
+        noAutoPrefix,
         selectorHandlers,
     );
 
@@ -291,6 +295,7 @@ export const generateCSSRuleset = (
     declarations /* : OrderedElements */,
     stringHandlers /* : StringHandlers */,
     useImportant /* : boolean */,
+    noAutoPrefix /* : boolean */,
     selectorHandlers /* : SelectorHandler[] */
 ) /* : string */ => {
     // Mutates declarations
@@ -300,7 +305,7 @@ export const generateCSSRuleset = (
         .reduce(arrayToObjectKeysReducer, Object.create(null));
 
     // NOTE(emily): This mutates handledDeclarations.elements.
-    const prefixedElements = prefixAll(declarations.elements);
+    const prefixedElements = noAutoPrefix ? declarations.elements : prefixAll(declarations.elements);
 
     const elementNames = Object.keys(prefixedElements);
     if (elementNames.length !== declarations.keyOrder.length) {

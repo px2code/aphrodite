@@ -114,8 +114,10 @@ export interface SelectorHandler {
 export interface Extension {
     selectorHandler?: SelectorHandler;
 }
-                             
+
 export function flushToStyleTag(): void;
+
+export function prefix(p: string): void;
 
 /**
  * Calling StyleSheet.extend() returns an object with each of the exported

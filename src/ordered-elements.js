@@ -9,6 +9,7 @@ export default class OrderedElements {
 
     constructor() {
         this.elements = {};
+        this.withoutColons = {};
         this.keyOrder = [];
     }
 
@@ -19,7 +20,8 @@ export default class OrderedElements {
         }
     }
 
-    set(key /* : string */, value /* : any */, shouldReorder /* : ?boolean */) {
+    set(key /* : string */, value /* : any */, shouldReorder /* : ?boolean */, withoutColon /* : ?boolean */) {
+
         if (!this.elements.hasOwnProperty(key)) {
             this.keyOrder.push(key);
         } else if (shouldReorder) {
@@ -61,6 +63,9 @@ export default class OrderedElements {
         }
 
         this.elements[key] = value;
+        if(withoutColon) {
+            this.withoutColons[key] = withoutColon;
+        }
     }
 
     get(key /* : string */) /* : any */ {

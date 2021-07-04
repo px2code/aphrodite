@@ -587,6 +587,7 @@
     */
     function OrderedElements() {
       this.elements = {};
+      this.withoutColons = {};
       this.keyOrder = [];
     }
 
@@ -606,6 +607,8 @@
     , value
     /* : any */
     , shouldReorder
+    /* : ?boolean */
+    , withoutColon
     /* : ?boolean */
     ) {
       if (!this.elements.hasOwnProperty(key)) {
@@ -648,6 +651,10 @@
       }
 
       this.elements[key] = value;
+
+      if (withoutColon) {
+        this.withoutColons[key] = withoutColon;
+      }
     };
 
     _proto.get = function get(key
@@ -1768,8 +1775,8 @@
     } // Generate the styles normally, and then wrap them in the media query.
 
 
-    var generated = generateSubtreeStyles(baseSelector);
-    return ["".concat(selector, "{").concat(generated.join(''), "}")];
+    var generated = generateSubtreeStyles('');
+    return generated.join('');
   }];
   /**
    * Generate CSS for a selector and some styles.
@@ -1853,9 +1860,44 @@
           if (Array.isArray(result)) {
             generatedStyles.push.apply(generatedStyles, _toConsumableArray(result));
           } else {
-            // eslint-disable-next-line
-            console.warn('WARNING: Selector handlers should return an array of rules.' + 'Returning a string containing multiple rules is deprecated.', handler);
-            generatedStyles.push("@media all {".concat(result, "}"));
+            var newKey = key;
+
+            switch (key) {
+              // scss mixin
+              case '@media (max-width: 575.98px)':
+                newKey = "@include xs";
+                break;
+
+              case '@media (max-width: 767.98px)':
+                newKey = "@include sm";
+                break;
+
+              case '@media (max-width: 991.98px)':
+                newKey = "@include md";
+                break;
+
+              case '@media (max-width: 1199.98px)':
+                newKey = "@include lg";
+                break;
+
+              case '@media (max-width: 1399.98px)':
+                newKey = "@include xl";
+                break;
+
+              case '@media (max-width: 1919.98px)':
+                newKey = "@include xxl";
+                break;
+
+              case '@media (max-width: 2999.98px)':
+                newKey = "@include xxxl";
+                break;
+
+              case '@media (max-width: 99999px)':
+                newKey = "@include max";
+                break;
+            }
+
+            plainDeclarations.set(newKey, result, true, newKey !== key);
           }
 
           return true;
@@ -1924,12 +1966,14 @@
   /* : string */
   , value
   /* : string */
-  , transformValue
+  , transformValue,
   /* : function */
-  ) {
+  withoutColon) {
     return (
+      /* : boolean */
+
       /* : string */
-      "".concat(kebabifyStyleName(key), ":").concat(transformValue(key, value), ";")
+      "".concat(kebabifyStyleName(key)).concat(withoutColon ? ' ' : ':').concat(transformValue(key, value), ";")
     );
   };
 
@@ -2046,10 +2090,10 @@
         // multiple rules for the same key. Here we flatten to multiple
         // pairs with the same key.
         for (var j = 0; j < value.length; j++) {
-          rules.push(transformRule(key, value[j], transformValue));
+          rules.push(transformRule(key, value[j], transformValue, declarations.withoutColons[key]));
         }
       } else {
-        rules.push(transformRule(key, value, transformValue));
+        rules.push(transformRule(key, value, transformValue, declarations.withoutColons[key]));
       }
     }
 

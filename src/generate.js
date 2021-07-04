@@ -86,8 +86,8 @@ export const defaultSelectorHandlers /* : SelectorHandler[] */ = [
             return null;
         }
         // Generate the styles normally, and then wrap them in the media query.
-        const generated = generateSubtreeStyles(baseSelector);
-        return [`${selector}{${generated.join('')}}`];
+        const generated = generateSubtreeStyles('');
+        return generated.join('');
     },
 ];
 
@@ -167,19 +167,25 @@ export const generateCSS = (
                 if (Array.isArray(result)) {
                     generatedStyles.push(...result);
                 } else {
-                    // eslint-disable-next-line
-                    console.warn(
-                        'WARNING: Selector handlers should return an array of rules.' +
-                        'Returning a string containing multiple rules is deprecated.',
-                        handler,
-                    );
-                    generatedStyles.push(`@media all {${result}}`);
+                    let newKey = key;
+                    switch (key) { // scss mixin
+                        case '@media (max-width: 575.98px)':  newKey = "@include xs"; break;
+                        case '@media (max-width: 767.98px)':  newKey = "@include sm"; break;
+                        case '@media (max-width: 991.98px)':  newKey = "@include md"; break;
+                        case '@media (max-width: 1199.98px)':  newKey = "@include lg"; break;
+                        case '@media (max-width: 1399.98px)':  newKey = "@include xl"; break;
+                        case '@media (max-width: 1919.98px)':  newKey = "@include xxl"; break;
+                        case '@media (max-width: 2999.98px)':  newKey = "@include xxxl"; break;
+                        case '@media (max-width: 99999px)':  newKey = "@include max"; break;
+                    }
+                    plainDeclarations.set(newKey, result, true, newKey !== key);
                 }
                 return true;
             }
 
               return false;
         });
+
         // If none of the handlers handled it, add it to the list of plain
         // style declarations.
         if (!foundHandler) {
@@ -248,9 +254,10 @@ const runStringHandlers = (
 const transformRule = (
     key /* : string */,
     value /* : string */,
-    transformValue /* : function */
+    transformValue, /* : function */
+    withoutColon, /* : boolean */
 ) /* : string */ => (
-    `${kebabifyStyleName(key)}:${transformValue(key, value)};`
+    `${kebabifyStyleName(key)}${withoutColon ? ' ' : ':'}${transformValue(key, value)};`
 );
 
 
@@ -361,10 +368,10 @@ export const generateCSSRuleset = (
             // multiple rules for the same key. Here we flatten to multiple
             // pairs with the same key.
             for (let j = 0; j < value.length; j++) {
-                rules.push(transformRule(key, value[j], transformValue));
+                rules.push(transformRule(key, value[j], transformValue, declarations.withoutColons[key]));
             }
         } else {
-            rules.push(transformRule(key, value, transformValue));
+            rules.push(transformRule(key, value, transformValue, declarations.withoutColons[key]));
         }
     }
 

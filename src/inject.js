@@ -315,12 +315,23 @@ export const injectAndGetClassName = (
         return "";
     }
 
-    const className = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_');
-    const newClassName = `${prefixName? `${prefixName}-` : ''}${className}`.replace(/_/g, '-');
+    const keyClassName = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_'); // unique
 
+    let newClassName;
+    let selector;
+    const classNames = keyClassName.split("$");
+    newClassName = `${prefixName ? `${prefixName}-` : ''}${ classNames[classNames.length - 1]}`.replace(/_/g, '-');
+    selector = classNames.map((name, index) => {
+        if(index < classNames.length - 1) {
+            return `.${name}`.replace(/_/g, '-');
+        } else {
+            return `.${newClassName}`;
+        }
+    }).join(' ');
+    
     injectStyleOnce(
-        newClassName,
-        `.${newClassName}`,
+        keyClassName,
+        selector,
         definitionBits,
         useImportant,
         noAutoPrefix,

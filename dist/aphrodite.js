@@ -2427,9 +2427,20 @@ var injectAndGetClassName = function injectAndGetClassName(useImportant
     return "";
   }
 
-  var className = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_');
-  var newClassName = "".concat(prefixName ? "".concat(prefixName, "-") : '').concat(className).replace(/_/g, '-');
-  injectStyleOnce(newClassName, ".".concat(newClassName), definitionBits, useImportant, noAutoPrefix, selectorHandlers);
+  var keyClassName = classNameBits.length === 1 ? classNameBits[0] : classNameBits.join('_'); // unique
+
+  var newClassName;
+  var selector;
+  var classNames = keyClassName.split("$");
+  newClassName = "".concat(prefixName ? "".concat(prefixName, "-") : '').concat(classNames[classNames.length - 1]).replace(/_/g, '-');
+  selector = classNames.map(function (name, index) {
+    if (index < classNames.length - 1) {
+      return ".".concat(name).replace(/_/g, '-');
+    } else {
+      return ".".concat(newClassName);
+    }
+  }).join(' ');
+  injectStyleOnce(keyClassName, selector, definitionBits, useImportant, noAutoPrefix, selectorHandlers);
   return newClassName;
 };
 

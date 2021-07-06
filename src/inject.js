@@ -320,10 +320,10 @@ export const injectAndGetClassName = (
     let newClassName;
     let selector;
     const classNames = keyClassName.split("$");
-    newClassName = `${prefixName || ''}${ classNames[classNames.length - 1].replace(/_/g, '-')}`;
+    newClassName = `${prefixName || ''}${ classNames[classNames.length - 1].replace(/[^_]([_])[^_]/g, x => x.replace('_', '-'))}`;
     selector = classNames.map((name, index) => {
         if(index < classNames.length - 1) {
-            return `.${name}`.replace(/_/g, '-');
+            return `.${name}`.replace(/[^_]([_])[^_]/g, x => x.replace('_', '-'));
         } else {
             return `.${newClassName}`;
         }

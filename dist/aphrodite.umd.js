@@ -2423,10 +2423,14 @@
     var newClassName;
     var selector;
     var classNames = keyClassName.split("$");
-    newClassName = "".concat(prefixName || '').concat(classNames[classNames.length - 1].replace(/_/g, '-'));
+    newClassName = "".concat(prefixName || '').concat(classNames[classNames.length - 1].replace(/[^_]([_])[^_]/g, function (x) {
+      return x.replace('_', '-');
+    }));
     selector = classNames.map(function (name, index) {
       if (index < classNames.length - 1) {
-        return ".".concat(name).replace(/_/g, '-');
+        return ".".concat(name).replace(/[^_]([_])[^_]/g, function (x) {
+          return x.replace('_', '-');
+        });
       } else {
         return ".".concat(newClassName);
       }

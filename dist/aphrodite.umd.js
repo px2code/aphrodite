@@ -2423,7 +2423,7 @@
     var newClassName;
     var selector;
     var classNames = keyClassName.split("$");
-    newClassName = "".concat(prefixName ? "".concat(prefixName, "-") : '').concat(classNames[classNames.length - 1]).replace(/_/g, '-');
+    newClassName = "".concat(prefixName || '').concat(classNames[classNames.length - 1].replace(/_/g, '-'));
     selector = classNames.map(function (name, index) {
       if (index < classNames.length - 1) {
         return ".".concat(name).replace(/_/g, '-');

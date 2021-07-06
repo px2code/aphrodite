@@ -320,7 +320,7 @@ export const injectAndGetClassName = (
     let newClassName;
     let selector;
     const classNames = keyClassName.split("$");
-    newClassName = `${prefixName ? `${prefixName}-` : ''}${ classNames[classNames.length - 1]}`.replace(/_/g, '-');
+    newClassName = `${prefixName || ''}${ classNames[classNames.length - 1].replace(/_/g, '-')}`;
     selector = classNames.map((name, index) => {
         if(index < classNames.length - 1) {
             return `.${name}`.replace(/_/g, '-');
@@ -328,7 +328,7 @@ export const injectAndGetClassName = (
             return `.${newClassName}`;
         }
     }).join(' ');
-    
+
     injectStyleOnce(
         keyClassName,
         selector,
